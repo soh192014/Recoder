@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>量子字符倍增器 | Cyber-Converter</title>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --bg-dark: #0a0b10;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* 科技感背景装饰 */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .container {
+            background: rgba(20, 25, 40, 0.8);
+            padding: 2rem;
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            border-radius: 8px;
+            width: 400px;
+            position: relative;
+            z-index: 1;
+        }
+
+        h2 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            margin-top: 0;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--neon-purple);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background: #1a1d29;
+            border: 1px solid #333;
+            color: var(--neon-blue);
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .result-area {
+            margin-top: 2rem;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid var(--neon-purple);
+            min-height: 50px;
+            word-break: break-all;
+        }
+
+        .result-label {
+            font-size: 0.7rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        #output {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 8px var(--neon-purple);
+        }
+
+        .status-bar {
+            font-size: 0.6rem;
+            margin-top: 10px;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>字符位移引擎</h2>
+    
+    <div class="input-group">
+        <label>输入字符 (数字或字母)</label>
+        <input type="text" id="inputString" placeholder="输入 A-Z 或 0-9..." maxlength="20">
+    </div>
+
+    <div class="input-group">
+        <label>量子倍数 (1 - 10)</label>
+        <input type="range" id="multiplier" min="1" max="10" value="1" oninput="updateVal(this.value)">
+        <div style="text-align: center;" id="multiplierVal">当前倍数: 1</div>
+    </div>
+
+    <div class="result-area">
+        <div class="result-label">输出序列 // OUTPUT_DATA</div>
+        <div id="output">---</div>
+    </div>
+
+    <div class="status-bar">
+        <span>CORE: ACTIVE</span>
+        <span>ENCRYPTION: ENABLED</span>
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('inputString');
+    const multiplier = document.getElementById('multiplier');
+    const output = document.getElementById('output');
+    const multiplierVal = document.getElementById('multiplierVal');
+
+    function updateVal(val) {
+        multiplierVal.innerText = `当前倍数: ${val}`;
+        process();
+    }
+
+    function process() {
+        const text = input.value;
+        const m = parseInt(multiplier.value);
+        let result = "";
+
+        for (let i = 0; i < text.length; i++) {
+            let char = text[i];
+            
+            // 处理大写字母
+            if (/[A-Z]/.test(char)) {
+                let code = char.charCodeAt(0) - 65;
+                let shifted = (code * m) % 26;
+                result += String.fromCharCode(shifted + 65);
+            } 
+            // 处理小写字母
+            else if (/[a-z]/.test(char)) {
+                let code = char.charCodeAt(0) - 97;
+                let shifted = (code * m) % 26;
+                result += String.fromCharCode(shifted + 97);
+            }
+            // 处理数字
+            else if (/[0-9]/.test(char)) {
+                let num = parseInt(char);
+                result += (num * m) % 10;
+            }
+            // 其他字符保持不变
+            else {
+                result += char;
+            }
+        }
+        
+        output.innerText = result || "---";
+    }
+
+    input.addEventListener('input', process);
+</script>
+
+</body>
+</html>
