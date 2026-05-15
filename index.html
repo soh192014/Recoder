@@ -2,188 +2,202 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>量子字符倍增器 | Cyber-Converter</title>
+    <title>量子字符转换器 2.0</title>
     <style>
         :root {
             --neon-blue: #00f3ff;
             --neon-purple: #bc13fe;
+            --neon-amber: #ffb300;
             --bg-dark: #0a0b10;
         }
 
         body {
             background-color: var(--bg-dark);
             color: white;
-            font-family: 'Segoe UI', 'Courier New', monospace;
+            font-family: 'Segoe UI', monospace;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            padding: 20px;
         }
 
-        /* 科技感背景装饰 */
-        body::before {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
+        .matrix-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(10, 11, 16, 0.9), rgba(10, 11, 16, 0.9)),
+                        repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.03) 0px, rgba(0, 255, 0, 0.03) 1px, transparent 1px, transparent 2px);
+            z-index: -1;
         }
 
-        .container {
-            background: rgba(20, 25, 40, 0.8);
-            padding: 2rem;
+        .panel {
+            background: rgba(20, 25, 40, 0.9);
+            padding: 20px;
             border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-            border-radius: 8px;
-            width: 400px;
-            position: relative;
-            z-index: 1;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+            border-radius: 4px;
+            width: 450px;
+            margin-bottom: 20px;
+        }
+
+        .panel.decoder {
+            border-color: var(--neon-amber);
+            box-shadow: 0 0 15px rgba(255, 179, 0, 0.1);
         }
 
         h2 {
-            text-align: center;
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px var(--neon-blue);
-            margin-top: 0;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
         }
 
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
+        .blue-title { color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
+        .amber-title { color: var(--neon-amber); text-shadow: 0 0 8px var(--neon-amber); }
+
+        .input-group { margin-bottom: 15px; }
 
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--neon-purple);
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            background: #1a1d29;
-            border: 1px solid #333;
-            color: var(--neon-blue);
-            box-sizing: border-box;
-            outline: none;
-        }
-
-        input:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 5px var(--neon-blue);
-        }
-
-        .result-area {
-            margin-top: 2rem;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 4px solid var(--neon-purple);
-            min-height: 50px;
-            word-break: break-all;
-        }
-
-        .result-label {
             font-size: 0.7rem;
             color: #888;
             margin-bottom: 5px;
+            text-transform: uppercase;
         }
 
-        #output {
-            font-size: 1.5rem;
-            font-weight: bold;
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid #333;
             color: #fff;
-            text-shadow: 0 0 8px var(--neon-purple);
+            outline: none;
+            font-family: monospace;
         }
 
-        .status-bar {
-            font-size: 0.6rem;
+        .panel.encoder input:focus { border-color: var(--neon-blue); }
+        .panel.decoder input:focus { border-color: var(--neon-amber); }
+
+        .output-box {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border: 1px dashed #444;
+            min-height: 40px;
+            word-break: break-all;
+            font-size: 1.2rem;
+        }
+
+        .hint {
+            font-size: 0.65rem;
+            color: #555;
             margin-top: 10px;
-            color: #444;
-            display: flex;
-            justify-content: space-between;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>字符位移引擎</h2>
-    
+<div class="matrix-bg"></div>
+
+<div class="panel encoder">
+    <h2 class="blue-title"><span>ENCODER</span> <span>位移加密</span></h2>
     <div class="input-group">
-        <label>输入字符 (数字或字母)</label>
-        <input type="text" id="inputString" placeholder="输入 A-Z 或 0-9..." maxlength="20">
+        <label>原始明文 / RAW DATA</label>
+        <input type="text" id="encInput" placeholder="输入字母或数字...">
     </div>
-
     <div class="input-group">
-        <label>量子倍数 (1 - 10)</label>
-        <input type="range" id="multiplier" min="1" max="10" value="1" oninput="updateVal(this.value)">
-        <div style="text-align: center;" id="multiplierVal">当前倍数: 1</div>
+        <label>倍率因子 / FACTOR (1-10)</label>
+        <input type="range" id="encFactor" min="1" max="10" value="9" oninput="process()">
+        <div id="encFactorVal" style="text-align:right; font-size: 0.8rem; color: var(--neon-blue);">Factor: 9</div>
     </div>
+    <div class="output-box" id="encOutput">---</div>
+</div>
 
-    <div class="result-area">
-        <div class="result-label">输出序列 // OUTPUT_DATA</div>
-        <div id="output">---</div>
+<div class="panel decoder">
+    <h2 class="amber-title"><span>DECODER</span> <span>逆向解算</span></h2>
+    <div class="input-group">
+        <label>加密密文 / ENCRYPTED DATA</label>
+        <input type="text" id="decInput" placeholder="输入待还原字符...">
     </div>
-
-    <div class="status-bar">
-        <span>CORE: ACTIVE</span>
-        <span>ENCRYPTION: ENABLED</span>
+    <div class="input-group">
+        <label>已知倍率 / KNOWN FACTOR</label>
+        <input type="range" id="decFactor" min="1" max="10" value="9" oninput="process()">
+        <div id="decFactorVal" style="text-align:right; font-size: 0.8rem; color: var(--neon-amber);">Factor: 9</div>
     </div>
+    <div class="output-box" id="decOutput" style="color: var(--neon-amber);">---</div>
+    <div class="hint">* 注意：如果倍率与进制(26或10)不互质，解码可能产生多解或无法还原。</div>
 </div>
 
 <script>
-    const input = document.getElementById('inputString');
-    const multiplier = document.getElementById('multiplier');
-    const output = document.getElementById('output');
-    const multiplierVal = document.getElementById('multiplierVal');
-
-    function updateVal(val) {
-        multiplierVal.innerText = `当前倍数: ${val}`;
-        process();
+    // 模逆元计算 (用于还原乘法)
+    function modInverse(a, m) {
+        for (let x = 1; x < m; x++) {
+            if (((a % m) * (x % m)) % m == 1) return x;
+        }
+        return null;
     }
 
-    function process() {
-        const text = input.value;
-        const m = parseInt(multiplier.value);
+    function transform(text, factor, mode) {
         let result = "";
+        const m_alpha = 26;
+        const m_num = 10;
 
-        for (let i = 0; i < text.length; i++) {
-            let char = text[i];
-            
-            // 处理大写字母
-            if (/[A-Z]/.test(char)) {
-                let code = char.charCodeAt(0) - 65;
-                let shifted = (code * m) % 26;
-                result += String.fromCharCode(shifted + 65);
+        // 如果是解码，尝试获取模逆元
+        let inv_alpha = mode === 'dec' ? modInverse(factor, m_alpha) : factor;
+        let inv_num = mode === 'dec' ? modInverse(factor, m_num) : factor;
+
+        for (let char of text) {
+            if (/[a-zA-Z]/.test(char)) {
+                let isUpper = char === char.toUpperCase();
+                let base = isUpper ? 65 : 97;
+                let code = char.charCodeAt(0) - base;
+                
+                let processed;
+                if (mode === 'enc') {
+                    processed = (code * factor) % m_alpha;
+                } else {
+                    processed = inv_alpha !== null ? (code * inv_alpha) % m_alpha : code;
+                }
+                result += String.fromCharCode(processed + base);
             } 
-            // 处理小写字母
-            else if (/[a-z]/.test(char)) {
-                let code = char.charCodeAt(0) - 97;
-                let shifted = (code * m) % 26;
-                result += String.fromCharCode(shifted + 97);
-            }
-            // 处理数字
             else if (/[0-9]/.test(char)) {
                 let num = parseInt(char);
-                result += (num * m) % 10;
-            }
-            // 其他字符保持不变
-            else {
+                let processed;
+                if (mode === 'enc') {
+                    processed = (num * factor) % m_num;
+                } else {
+                    processed = inv_num !== null ? (num * inv_num) % m_num : num;
+                }
+                result += processed.toString();
+            } else {
                 result += char;
             }
         }
-        
-        output.innerText = result || "---";
+        return result;
     }
 
-    input.addEventListener('input', process);
+    function process() {
+        // 更新 UI 数值
+        const ef = document.getElementById('encFactor').value;
+        const df = document.getElementById('decFactor').value;
+        document.getElementById('encFactorVal').innerText = "Factor: " + ef;
+        document.getElementById('decFactorVal').innerText = "Factor: " + df;
+
+        // 执行计算
+        const encIn = document.getElementById('encInput').value;
+        document.getElementById('encOutput').innerText = transform(encIn, parseInt(ef), 'enc') || "---";
+
+        const decIn = document.getElementById('decInput').value;
+        document.getElementById('decOutput').innerText = transform(decIn, parseInt(df), 'dec') || "---";
+    }
+
+    document.getElementById('encInput').addEventListener('input', process);
+    document.getElementById('decInput').addEventListener('input', process);
+
+    // 初始化执行一次
+    process();
 </script>
 
 </body>
