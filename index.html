@@ -1,203 +1,451 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>量子字符转换器 2.0</title>
-    <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-purple: #bc13fe;
-            --neon-amber: #ffb300;
-            --bg-dark: #0a0b10;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quantum Cipher 3.0</title>
 
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Segoe UI', monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
+<style>
+:root{
+    --blue:#00f7ff;
+    --purple:#b400ff;
+    --amber:#ffb300;
+    --bg:#070b12;
+    --panel:#111827;
+}
 
-        .matrix-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(10, 11, 16, 0.9), rgba(10, 11, 16, 0.9)),
-                        repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.03) 0px, rgba(0, 255, 0, 0.03) 1px, transparent 1px, transparent 2px);
-            z-index: -1;
-        }
+*{
+    box-sizing:border-box;
+}
 
-        .panel {
-            background: rgba(20, 25, 40, 0.9);
-            padding: 20px;
-            border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
-            border-radius: 4px;
-            width: 450px;
-            margin-bottom: 20px;
-        }
+body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:white;
+    font-family:"Segoe UI",monospace;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
 
-        .panel.decoder {
-            border-color: var(--neon-amber);
-            box-shadow: 0 0 15px rgba(255, 179, 0, 0.1);
-        }
+/* 动态背景 */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+    repeating-linear-gradient(
+        0deg,
+        rgba(0,255,100,0.03) 0px,
+        rgba(0,255,100,0.03) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    animation:matrix 15s linear infinite;
+    z-index:-1;
+}
 
-        h2 {
-            margin: 0 0 15px 0;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            display: flex;
-            justify-content: space-between;
-        }
+@keyframes matrix{
+    from{
+        transform:translateY(0);
+    }
+    to{
+        transform:translateY(100px);
+    }
+}
 
-        .blue-title { color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
-        .amber-title { color: var(--neon-amber); text-shadow: 0 0 8px var(--neon-amber); }
+.container{
+    width:95%;
+    max-width:1000px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+}
 
-        .input-group { margin-bottom: 15px; }
+.panel{
+    background:rgba(17,24,39,0.85);
+    border:1px solid rgba(255,255,255,0.08);
+    backdrop-filter:blur(10px);
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 0 25px rgba(0,0,0,0.4);
+}
 
-        label {
-            display: block;
-            font-size: 0.7rem;
-            color: #888;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
+.encoder{
+    border-top:4px solid var(--blue);
+}
 
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #000;
-            border: 1px solid #333;
-            color: #fff;
-            outline: none;
-            font-family: monospace;
-        }
+.decoder{
+    border-top:4px solid var(--amber);
+}
 
-        .panel.encoder input:focus { border-color: var(--neon-blue); }
-        .panel.decoder input:focus { border-color: var(--neon-amber); }
+.title{
+    font-size:1.5rem;
+    margin-bottom:20px;
+    letter-spacing:2px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
 
-        .output-box {
-            background: rgba(0,0,0,0.5);
-            padding: 15px;
-            border: 1px dashed #444;
-            min-height: 40px;
-            word-break: break-all;
-            font-size: 1.2rem;
-        }
+.encoder .title{
+    color:var(--blue);
+    text-shadow:0 0 10px var(--blue);
+}
 
-        .hint {
-            font-size: 0.65rem;
-            color: #555;
-            margin-top: 10px;
-        }
-    </style>
+.decoder .title{
+    color:var(--amber);
+    text-shadow:0 0 10px var(--amber);
+}
+
+.input-group{
+    margin-bottom:18px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    color:#aaa;
+    font-size:0.8rem;
+    text-transform:uppercase;
+}
+
+textarea{
+    width:100%;
+    min-height:120px;
+    resize:none;
+    border:none;
+    outline:none;
+    border-radius:12px;
+    background:#000;
+    color:white;
+    padding:15px;
+    font-size:1rem;
+    font-family:monospace;
+    border:1px solid #222;
+    transition:0.3s;
+}
+
+.encoder textarea:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 15px rgba(0,247,255,0.3);
+}
+
+.decoder textarea:focus{
+    border-color:var(--amber);
+    box-shadow:0 0 15px rgba(255,179,0,0.3);
+}
+
+.factor-buttons{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.factor-btn{
+    flex:1;
+    min-width:60px;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:#1f2937;
+    color:white;
+    cursor:pointer;
+    transition:0.25s;
+    font-weight:bold;
+}
+
+.factor-btn:hover{
+    transform:translateY(-3px);
+}
+
+.encoder .factor-btn.active{
+    background:var(--blue);
+    color:black;
+    box-shadow:0 0 15px var(--blue);
+}
+
+.decoder .factor-btn.active{
+    background:var(--amber);
+    color:black;
+    box-shadow:0 0 15px var(--amber);
+}
+
+.output{
+    margin-top:20px;
+    background:#000;
+    border-radius:12px;
+    padding:15px;
+    min-height:120px;
+    border:1px dashed #333;
+    word-break:break-all;
+    font-size:1.1rem;
+}
+
+.hint{
+    margin-top:15px;
+    color:#777;
+    font-size:0.75rem;
+    line-height:1.5;
+}
+
+.copy-btn{
+    margin-top:15px;
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.encoder .copy-btn{
+    background:var(--blue);
+    color:black;
+}
+
+.decoder .copy-btn{
+    background:var(--amber);
+    color:black;
+}
+
+.copy-btn:hover{
+    transform:scale(1.02);
+}
+
+.status{
+    margin-top:10px;
+    color:#00ff95;
+    font-size:0.8rem;
+}
+
+@media(max-width:800px){
+    .container{
+        grid-template-columns:1fr;
+    }
+}
+</style>
 </head>
+
 <body>
 
-<div class="matrix-bg"></div>
+<div class="container">
 
-<div class="panel encoder">
-    <h2 class="blue-title"><span>ENCODER</span> <span>位移加密</span></h2>
-    <div class="input-group">
-        <label>原始明文 / RAW DATA</label>
-        <input type="text" id="encInput" placeholder="输入字母或数字...">
-    </div>
-    <div class="input-group">
-        <label>倍率因子 / FACTOR (1-10)</label>
-        <input type="range" id="encFactor" min="1" max="10" value="9" oninput="process()">
-        <div id="encFactorVal" style="text-align:right; font-size: 0.8rem; color: var(--neon-blue);">Factor: 9</div>
-    </div>
-    <div class="output-box" id="encOutput">---</div>
-</div>
+    <!-- 编码器 -->
+    <div class="panel encoder">
+        <div class="title">
+            <span>QUANTUM ENCODER</span>
+            <span>加密器</span>
+        </div>
 
-<div class="panel decoder">
-    <h2 class="amber-title"><span>DECODER</span> <span>逆向解算</span></h2>
-    <div class="input-group">
-        <label>加密密文 / ENCRYPTED DATA</label>
-        <input type="text" id="decInput" placeholder="输入待还原字符...">
+        <div class="input-group">
+            <label>原始内容</label>
+            <textarea id="encInput" placeholder="输入要加密的内容..."></textarea>
+        </div>
+
+        <div class="input-group">
+            <label>安全倍率</label>
+            <div class="factor-buttons" id="encFactors"></div>
+        </div>
+
+        <div class="output" id="encOutput">---</div>
+
+        <button class="copy-btn" onclick="copyText('encOutput')">
+            复制加密结果
+        </button>
+
+        <div class="status" id="encStatus"></div>
     </div>
-    <div class="input-group">
-        <label>已知倍率 / KNOWN FACTOR</label>
-        <input type="range" id="decFactor" min="1" max="10" value="9" oninput="process()">
-        <div id="decFactorVal" style="text-align:right; font-size: 0.8rem; color: var(--neon-amber);">Factor: 9</div>
+
+    <!-- 解码器 -->
+    <div class="panel decoder">
+        <div class="title">
+            <span>QUANTUM DECODER</span>
+            <span>解密器</span>
+        </div>
+
+        <div class="input-group">
+            <label>密文内容</label>
+            <textarea id="decInput" placeholder="输入要解密的内容..."></textarea>
+        </div>
+
+        <div class="input-group">
+            <label>已知倍率</label>
+            <div class="factor-buttons" id="decFactors"></div>
+        </div>
+
+        <div class="output" id="decOutput">---</div>
+
+        <button class="copy-btn" onclick="copyText('decOutput')">
+            复制解密结果
+        </button>
+
+        <div class="status" id="decStatus"></div>
+
+        <div class="hint">
+            Quantum Cipher 3.0<br>
+            仅允许真正可逆的倍率：1 / 3 / 7 / 9
+        </div>
     </div>
-    <div class="output-box" id="decOutput" style="color: var(--neon-amber);">---</div>
-    <div class="hint">* 注意：如果倍率与进制(26或10)不互质，解码可能产生多解或无法还原。</div>
+
 </div>
 
 <script>
-    // 模逆元计算 (用于还原乘法)
-    function modInverse(a, m) {
-        for (let x = 1; x < m; x++) {
-            if (((a % m) * (x % m)) % m == 1) return x;
+/* =========================
+   Quantum Cipher 3.0
+========================= */
+
+const validFactors = [1,3,7,9];
+
+let encFactor = 9;
+let decFactor = 9;
+
+/* 创建按钮 */
+function createFactorButtons(containerId, mode){
+    const container = document.getElementById(containerId);
+
+    validFactors.forEach(factor=>{
+        const btn = document.createElement("button");
+        btn.className = "factor-btn";
+        btn.innerText = factor;
+
+        if(factor === 9){
+            btn.classList.add("active");
         }
-        return null;
-    }
 
-    function transform(text, factor, mode) {
-        let result = "";
-        const m_alpha = 26;
-        const m_num = 10;
+        btn.onclick = ()=>{
+            container.querySelectorAll(".factor-btn")
+            .forEach(b=>b.classList.remove("active"));
 
-        // 如果是解码，尝试获取模逆元
-        let inv_alpha = mode === 'dec' ? modInverse(factor, m_alpha) : factor;
-        let inv_num = mode === 'dec' ? modInverse(factor, m_num) : factor;
+            btn.classList.add("active");
 
-        for (let char of text) {
-            if (/[a-zA-Z]/.test(char)) {
-                let isUpper = char === char.toUpperCase();
-                let base = isUpper ? 65 : 97;
-                let code = char.charCodeAt(0) - base;
-                
-                let processed;
-                if (mode === 'enc') {
-                    processed = (code * factor) % m_alpha;
-                } else {
-                    processed = inv_alpha !== null ? (code * inv_alpha) % m_alpha : code;
-                }
-                result += String.fromCharCode(processed + base);
-            } 
-            else if (/[0-9]/.test(char)) {
-                let num = parseInt(char);
-                let processed;
-                if (mode === 'enc') {
-                    processed = (num * factor) % m_num;
-                } else {
-                    processed = inv_num !== null ? (num * inv_num) % m_num : num;
-                }
-                result += processed.toString();
-            } else {
-                result += char;
+            if(mode === "enc"){
+                encFactor = factor;
+            }else{
+                decFactor = factor;
             }
+
+            process();
+        };
+
+        container.appendChild(btn);
+    });
+}
+
+createFactorButtons("encFactors","enc");
+createFactorButtons("decFactors","dec");
+
+/* 求模逆元 */
+function modInverse(a,m){
+    for(let x=1;x<m;x++){
+        if((a*x)%m===1){
+            return x;
         }
-        return result;
+    }
+    return null;
+}
+
+/* 转换 */
+function transform(text,factor,mode){
+
+    let result = "";
+
+    const alphaMod = 26;
+    const numMod = 10;
+
+    const alphaKey = mode==="enc"
+        ? factor
+        : modInverse(factor,alphaMod);
+
+    const numKey = mode==="enc"
+        ? factor
+        : modInverse(factor,numMod);
+
+    for(let char of text){
+
+        /* 字母 */
+        if(/[a-zA-Z]/.test(char)){
+
+            const isUpper = char===char.toUpperCase();
+            const base = isUpper ? 65 : 97;
+
+            let code = char.charCodeAt(0)-base;
+
+            let processed = (code*alphaKey)%alphaMod;
+
+            result += String.fromCharCode(processed+base);
+        }
+
+        /* 数字 */
+        else if(/[0-9]/.test(char)){
+
+            let num = parseInt(char);
+
+            let processed = (num*numKey)%numMod;
+
+            result += processed.toString();
+        }
+
+        /* 其它 */
+        else{
+            result += char;
+        }
     }
 
-    function process() {
-        // 更新 UI 数值
-        const ef = document.getElementById('encFactor').value;
-        const df = document.getElementById('decFactor').value;
-        document.getElementById('encFactorVal').innerText = "Factor: " + ef;
-        document.getElementById('decFactorVal').innerText = "Factor: " + df;
+    return result;
+}
 
-        // 执行计算
-        const encIn = document.getElementById('encInput').value;
-        document.getElementById('encOutput').innerText = transform(encIn, parseInt(ef), 'enc') || "---";
+/* 主处理 */
+function process(){
 
-        const decIn = document.getElementById('decInput').value;
-        document.getElementById('decOutput').innerText = transform(decIn, parseInt(df), 'dec') || "---";
+    const encInput = document.getElementById("encInput").value;
+    const decInput = document.getElementById("decInput").value;
+
+    const encResult = transform(encInput,encFactor,"enc");
+    const decResult = transform(decInput,decFactor,"dec");
+
+    document.getElementById("encOutput").innerText =
+        encResult || "---";
+
+    document.getElementById("decOutput").innerText =
+        decResult || "---";
+}
+
+/* 自动监听 */
+document.getElementById("encInput")
+.addEventListener("input",process);
+
+document.getElementById("decInput")
+.addEventListener("input",process);
+
+/* 复制 */
+function copyText(id){
+
+    const text = document.getElementById(id).innerText;
+
+    if(text==="---") return;
+
+    navigator.clipboard.writeText(text);
+
+    if(id==="encOutput"){
+        document.getElementById("encStatus")
+        .innerText = "✅ 已复制加密结果";
+    }else{
+        document.getElementById("decStatus")
+        .innerText = "✅ 已复制解密结果";
     }
 
-    document.getElementById('encInput').addEventListener('input', process);
-    document.getElementById('decInput').addEventListener('input', process);
+    setTimeout(()=>{
+        document.getElementById("encStatus").innerText="";
+        document.getElementById("decStatus").innerText="";
+    },2000);
+}
 
-    // 初始化执行一次
-    process();
+/* 初始化 */
+process();
 </script>
 
 </body>
